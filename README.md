@@ -21,6 +21,24 @@ large part of why published RAG comparisons disagree with each other.
 Only **one of the eight** projects needs a model at all, and it is the one that
 loses.
 
+## The projects
+
+| # | Project |
+|---|---|
+| [**01**](projects/01_retrieval_unit/) | [**What should a retrieval unit be?**](projects/01_retrieval_unit/) |
+| [**02**](projects/02_rag_fusion/) | [**RAG-Fusion without a language model**](projects/02_rag_fusion/) |
+| [**03**](projects/03_iterative_multihop/) | [**Multi-hop retrieval without a reasoner &nbsp;⭐**](projects/03_iterative_multihop/) |
+| [**04**](projects/04_hyde_vs_prf/) | [**HyDE versus a technique from 1971**](projects/04_hyde_vs_prf/) |
+| [**05**](projects/05_corrective_rag/) | [**Corrective RAG: can retrieval detect its own failure?**](projects/05_corrective_rag/) |
+| [**06**](projects/06_raptor_clusters/) | [**RAPTOR's tree, without the summariser**](projects/06_raptor_clusters/) |
+| [**07**](projects/07_entity_graph/) | [**GraphRAG's graph, built by a regular expression**](projects/07_entity_graph/) |
+| [**08**](projects/08_speculative_rerank/) | [**Speculative retrieval: how weak may the drafter be?**](projects/08_speculative_rerank/) |
+| [**09**](projects/09_learned_router/) | [**A learned router, testing project 03's excuse**](projects/09_learned_router/) |
+
+Project **09** is committed but was not written up: it has no `results.json` and no section
+below. It exists to test whether project 03's explanation for its own gap survives a better
+router, which makes it the one project here that could overturn another.
+
 ## The corpus
 
 HotpotQA's distractor split, pooled and de-duplicated by title.
