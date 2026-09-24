@@ -1,24 +1,24 @@
 <h1 align="center">rag-lab (NumPy · sentence-transformers · HuggingFace Datasets)</h1>
-<p align="center"><i>Eight RAG techniques measured as retrieval, on one real corpus, with almost no language model in the loop</i></p>
+<p align="center"><i>Nine RAG techniques measured as retrieval, on one real corpus, with almost no language model in the loop</i></p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="python">
-  <img src="https://img.shields.io/badge/projects-8-blue" alt="projects">
+  <img src="https://img.shields.io/badge/projects-9-blue" alt="projects">
   <img src="https://img.shields.io/badge/corpus-14%2C602%20real%20passages-blue" alt="corpus">
   <img src="https://img.shields.io/badge/queries-1%2C500%20with%20gold%20labels-blue" alt="queries">
-  <img src="https://img.shields.io/badge/LLM%20required-1%20of%208-success" alt="llm">
+  <img src="https://img.shields.io/badge/LLM%20required-1%20of%209-success" alt="llm">
 </p>
 
 ---
 
-> ### Six of the eight techniques lost to a plain hybrid baseline. A method from 1971 beat HyDE. The two that won, won only where theory said they should — and the averages hid it.
+> ### Five of the nine techniques lost to a plain hybrid baseline. A method from 1971 beat HyDE. The four that won, won only where theory said they should — and the averages hid it.
 
 Every variant here is a **retrieval** technique, so it is measured as one. No
 generation scoring, no LLM-as-judge. Putting a generator at the end of the
 pipeline adds its noise on top of the effect you are trying to see, which is a
 large part of why published RAG comparisons disagree with each other.
 
-Only **one of the eight** projects needs a model at all, and it is the one that
+Only **one of the nine** projects needs a model at all, and it is the one that
 loses.
 
 ## The projects
@@ -35,9 +35,8 @@ loses.
 | [**08**](projects/08_speculative_rerank/) | [**Speculative retrieval: how weak may the drafter be?**](projects/08_speculative_rerank/) |
 | [**09**](projects/09_learned_router/) | [**A learned router, testing project 03's excuse**](projects/09_learned_router/) |
 
-Project **09** is committed but was not written up: it has no `results.json` and no section
-below. It exists to test whether project 03's explanation for its own gap survives a better
-router, which makes it the one project here that could overturn another.
+Project **09** tests whether project 03's explanation for its own gap survives a better
+router. It does: see [its section below](#09--a-learned-router-testing-project-03s-excuse).
 
 ## The corpus
 
@@ -104,6 +103,7 @@ Everything is measured against the same hybrid baseline: **answerable@10 = 0.813
 
 | # | Technique | Best result | vs baseline | Needs an LLM? |
 |---|---|---:|---:|:---:|
+| 09 | **Learned router + two-hop** | **0.864** | **+5.1** | no |
 | 04 | **PRF + HyDE fused** | **0.852** | **+3.9** | partly |
 | 03 | **Iterative two-hop, routed** | **0.853** | **+4.0** | no |
 | 04 | PRF alone (no model) | 0.831 | +1.8 | no |
@@ -159,6 +159,10 @@ But applied blindly it **costs 11.7 points** on comparison questions, which
 already name both entities. Routing recovers most of it, and is capped by the
 router: the rule classifier has recall 0.977 but **precision 0.386**, and its 477
 misroutes are exactly why routed bridge (0.820) trails always-two-hop (0.840).
+
+That explanation is this project's own excuse for its own gap, so
+[project 09](#09--a-learned-router-testing-project-03s-excuse) went and tested it with a
+better router. It holds.
 
 ### [04 · HyDE versus a technique from 1971](projects/04_hyde_vs_prf/)
 
@@ -263,7 +267,44 @@ cross-encoder on every query to recover from a weak one.
 
 ---
 
-## What the eight say together
+### [09 · A learned router, testing project 03's excuse](projects/09_learned_router/)
+
+Project 03 found a second hop worth **+7.1 points on bridge questions and −11.7 on
+comparison questions**, so the whole gain depends on routing each question correctly. Its
+rule-based router had recall 0.985 and precision **0.391** — it fired on 310 questions that
+did not want a second hop — and project 03 blamed that for routing failing to beat
+always-two-hop. That is a convenient excuse, and it is testable: build a better router and
+see whether the gap closes.
+
+Logistic regression over hand-written features, **fitted on the first 500 queries and
+scored on a disjoint 1,000**, because a router scored on the questions it was tuned on
+would be exactly the inflated number this lab exists to avoid.
+
+| router | precision | recall | F1 | accuracy |
+|---|---:|---:|---:|---:|
+| rule-based (project 03) | 0.391 | **0.985** | 0.560 | 0.687 |
+| **learned** | **0.895** | 0.842 | **0.867** | **0.948** |
+
+| strategy | answerable@10 | bridge | comparison |
+|---|---:|---:|---:|
+| single hop | 0.811 | 0.767 | **0.985** |
+| two hops, always | 0.850 | 0.838 | 0.896 |
+| routed: rule-based | 0.849 | 0.816 | 0.980 |
+| **routed: learned** | **0.864** | 0.836 | 0.975 |
+| routed: *oracle* | *0.868* | *0.838* | *0.985* |
+
+**The excuse holds.** More than doubling router precision moves routed retrieval from
+0.849 to **0.864** — past always-two-hop, which it previously failed to beat — and lands
+**0.004 short of a perfect router**. That closes 79% of the headroom the oracle leaves.
+
+The honest reading of the pair: project 03 was right that routing was the limitation and
+not the technique, and it could not have known that without this. A result that only
+confirms the excuse of the project that produced it is worth more suspicion than most, which
+is why the router is fitted on a held-out slice and the oracle row is printed beside it — if
+the learned router had merely memorised the test questions, it would have beaten the oracle,
+not stopped just short of it.
+
+## What the nine say together
 
 **RRF is not free.** It dilutes when one input is weak (02's degraded rewrites,
 06's cluster members) and helps when both are strong (04's PRF + HyDE). Every
